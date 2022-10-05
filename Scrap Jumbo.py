@@ -137,7 +137,10 @@ def get_data_product_beautifulsoup(soup, id_category, id_brand, id_type, id_prod
     # Get data of the product
     name_product = (find_firts_text_element_by_class_beautifulsoup(soup, 'h1', 'product-name')).upper()
     if name_product == 'NA':
-            name_product = (find_text_by_class_beautifulsoup(soup, 'h1', 'product-name')).upper()
+        name_product = (find_text_by_class_beautifulsoup(soup, 'h1', 'product-name')).upper()
+        if name_product == 'NA':
+            print('\tError read product - {}'.format(url_product))
+            return 'NA'
     
     # URL of the image is in the style of a div
     image_product = find_by_class_beautifulsoup(soup, 'div', 'zoomed-image')
@@ -346,26 +349,26 @@ df_supermarket = pd.DataFrame(columns=columns_supermarket)
 df_error_products = pd.DataFrame(columns=columns_error)
 
 # Load dataframes if exists
-if exists(MAIN_PATH + '/products.csv'):
-    df_supermarket = pd.read_csv(MAIN_PATH + '/products.csv')
+if exists(MAIN_PATH + '/Data/products.csv'):
+    df_products = pd.read_csv(MAIN_PATH + '/Data/products.csv')
     
-if exists(MAIN_PATH + '/type.csv'):
-    df_supermarket = pd.read_csv(MAIN_PATH + '/type.csv')
+if exists(MAIN_PATH + '/Data/type.csv'):
+    df_type = pd.read_csv(MAIN_PATH + '/Data/type.csv')
     
-if exists(MAIN_PATH + '/brand.csv'):
-    df_supermarket = pd.read_csv(MAIN_PATH + '/brand.csv')
+if exists(MAIN_PATH + '/Data/brand.csv'):
+    df_brand = pd.read_csv(MAIN_PATH + '/Data/brand.csv')
     
-if exists(MAIN_PATH + '/categories.csv'):
-    df_supermarket = pd.read_csv(MAIN_PATH + '/categories.csv')
+if exists(MAIN_PATH + '/Data/categories.csv'):
+    df_categories = pd.read_csv(MAIN_PATH + '/Data/categories.csv')
     
-if exists(MAIN_PATH + '/supermarketproduct.csv'):
-    df_supermarket = pd.read_csv(MAIN_PATH + '/supermarketproduct.csv')
+if exists(MAIN_PATH + '/Data/supermarketproduct.csv'):
+    df_super_product = pd.read_csv(MAIN_PATH + '/Data/supermarketproduct.csv')
     
-if exists(MAIN_PATH + '/supermarket.csv'):
-    df_supermarket = pd.read_csv(MAIN_PATH + '/supermarket.csv')
+if exists(MAIN_PATH + '/Data/supermarket.csv'):
+    df_supermarket = pd.read_csv(MAIN_PATH + '/Data/supermarket.csv')
     
-if exists(MAIN_PATH + '/error_products.csv'):
-    df_supermarket = pd.read_csv(MAIN_PATH + '/error_products.csv')
+if exists(MAIN_PATH + '/Data/error_products.csv'):
+    df_error_products = pd.read_csv(MAIN_PATH + '/Data/error_products.csv')
 
 # Connect to main website
 driver = webdriver.Chrome(MAIN_PATH + '/chromedriver.exe')
@@ -383,7 +386,7 @@ soup = BeautifulSoup(driver.page_source, 'lxml')
 
 # Data supermarket
 if exists_row_dataframe(df_supermarket, 'supermarket', NAME_SUPERMARKET) == False:
-    url_logo = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Logo_Santa_Isabel_Cencosud_transparente.svg/1200px-Logo_Santa_Isabel_Cencosud_transparente.svg.png'
+    url_logo = 'https://upload.wikimedia.org/wikipedia/commons/d/d3/Logo_Jumbo_Cencosud.png'
     data = [len(df_supermarket), NAME_SUPERMARKET, url_logo]
     row = pd.DataFrame(data=[data], columns=columns_supermarket)
     df_supermarket = pd.concat([df_supermarket, row], ignore_index=True)
@@ -462,14 +465,14 @@ for i in range(len(list_url_categories)):
         total_products += 1
         cont_products_category += 1
         print('[{}/{}] > {} - ${} < ${}'.format(cont_products_category, total_products_category, data_product[4], data_superproduct[3], data_superproduct[2]))
-
+        
 print('Total products from {}: {}'.format(NAME_SUPERMARKET, total_products))
 
-""" # Save DataFrame to .csv
-save_data_csv(df_products, 'Data/products.csv', columns_product)
-save_data_csv(df_categories, 'Data/categories.csv', columns_category)
-save_data_csv(df_type, 'Data/type.csv', columns_type)
-save_data_csv(df_brand, 'Data/brand.csv', columns_brand)
-save_data_csv(df_super_product, 'Data/supermarketproduct.csv', columns_super_product)
-save_data_csv(df_supermarket, 'Data/supermarket.csv', columns_supermarket)
-save_data_csv(df_error_products, 'Data/error_products.csv', columns_error) """
+# Save DataFrame to .csv
+save_data_csv(df_products, 'Data/products', columns_product)
+save_data_csv(df_categories, 'Data/categories', columns_category)
+save_data_csv(df_type, 'Data/type', columns_type)
+save_data_csv(df_brand, 'Data/brand', columns_brand)
+save_data_csv(df_super_product, 'Data/supermarketproduct', columns_super_product)
+save_data_csv(df_supermarket, 'Data/supermarket', columns_supermarket)
+save_data_csv(df_error_products, 'Data/error_products', columns_error)
