@@ -18,6 +18,7 @@ list_url = ['https://www.santaisabel.cl/quesomantecoso-quilque-28laminasenvasere
 # Connect to main website
 driver = webdriver.Chrome(MAIN_PATH + '/chromedriver.exe')
 driver.set_window_size(1280, 720)
+total_products = 0
 
 for url in list_url:
     driver.get(url)
@@ -46,7 +47,7 @@ for url in list_url:
         sale_price = soup.find('span', class_ = 'price-best').text
     except:
         try:
-            sale_price = soup.find_all('span', class_ = 'price-best').text
+            sale_price = soup.find_all('span', class_ = 'price-best')[0].text
         except:
             sale_price = 'NA'
     
@@ -93,3 +94,7 @@ for url in list_url:
     
     row = pd.DataFrame(data=[data], columns=columns)
     df = pd.concat([df, row], ignore_index=True)
+    
+    total_products += 1
+    if total_products == 10:
+        break

@@ -10,9 +10,9 @@ from datetime import date
 
 
 MAIN_PATH = 'E:/Universidad/Asignaturas/Taller Ingeniería de Software/scrapping_proyect'
-DIRECTORY_PATH = '/Santa Isabel/'
-MAIN_URL = 'https://www.santaisabel.cl'
-NAME_SUPERMARKET = 'Santa Isabel'
+DIRECTORY_PATH = '/Jumbo/'
+MAIN_URL = 'https://www.jumbo.cl'
+NAME_SUPERMARKET = 'Jumbo'
 
 
 def find_text_by_class_beautifulsoup(soup, tag, class_name):
@@ -152,7 +152,7 @@ def get_data_product_beautifulsoup(soup, id_category, id_brand, id_type, id_prod
     description1 = find_text_by_class_beautifulsoup(soup, 'p', '')
     description2 = find_text_by_class_beautifulsoup(soup, 'div', 'product-description-content')
     
-    description_product = 'NA'
+    description_product = ''
     if description1 != 'NA' and description1 != '':
         description_product = description1
     
@@ -175,16 +175,17 @@ def get_data_product_beautifulsoup(soup, id_category, id_brand, id_type, id_prod
 def get_data_categories(df_categories, categories_element):   
     # Remove categories are void and get data of all categories
     for item in categories_element:
-        if item.get('href') != '/' and exists_row_dataframe(df_categories, 'category', item.text) == False:
-            df_row = pd.DataFrame(data=[[len(df_categories), (item.text).upper()]], columns=columns_category)
-            df_categories = pd.concat([df_categories, df_row], ignore_index=True)
+        if item.text != 'Exclusivo en Jumbo' and item.get('href') != '/':
+            if exists_row_dataframe(df_categories, 'category', item.text) == False:
+                df_row = pd.DataFrame(data=[[len(df_categories), (item.text).upper()]], columns=columns_category)
+                df_categories = pd.concat([df_categories, df_row], ignore_index=True)
     return df_categories
 
 
 def get_all_url_from_elements(list_elements):
     list_url = []
     for item in list_elements:
-        if item.get('href') != '/':
+        if item.text != 'Exclusivo en Jumbo' and item.get('href') != '/':
             url = MAIN_URL + item.get('href')
             list_url.append(url)
     return list_url
@@ -464,11 +465,11 @@ for i in range(len(list_url_categories)):
 
 print('Total products from {}: {}'.format(NAME_SUPERMARKET, total_products))
 
-# Save DataFrame to .csv
+""" # Save DataFrame to .csv
 save_data_csv(df_products, 'Data/products.csv', columns_product)
 save_data_csv(df_categories, 'Data/categories.csv', columns_category)
 save_data_csv(df_type, 'Data/type.csv', columns_type)
 save_data_csv(df_brand, 'Data/brand.csv', columns_brand)
 save_data_csv(df_super_product, 'Data/supermarketproduct.csv', columns_super_product)
 save_data_csv(df_supermarket, 'Data/supermarket.csv', columns_supermarket)
-save_data_csv(df_error_products, 'Data/error_products.csv', columns_error)
+save_data_csv(df_error_products, 'Data/error_products.csv', columns_error) """

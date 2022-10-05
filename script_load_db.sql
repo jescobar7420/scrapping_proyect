@@ -1,0 +1,1 @@
+COPY categorias FROM 'E:\Universidad\Asignaturas\Taller Ingeniería de Software\scrapping_proyect\Data\categories.csv' DELIMITER ',' CSV HEADER ENCODING 'UTF8';
