@@ -221,7 +221,7 @@ def get_all_products_category(browser, soup, url_category):
     for page in pages_categories:
         # Connect to page category
         browser.get(page)
-        sleep(3)
+        sleep(5)
         
         # Get url of all products from page category
         soup = BeautifulSoup(browser.page_source, 'lxml')
@@ -401,12 +401,16 @@ df_categories = get_data_categories(df_categories, categories)
 # Get all urls from categories
 list_url_categories = get_all_url_from_elements(categories)
 
+# Create a dataframe for this supermarket
+df_categories_supermarket = pd.DataFrame(columns=columns_category)
+df_categories_supermarket = get_data_categories(df_categories_supermarket, categories)
+
 # Browse all categories
 for i in range(len(list_url_categories)):
     driver.get(list_url_categories[i])
-    sleep(3)
+    sleep(5)
     soup = BeautifulSoup(driver.page_source, 'lxml')
-    print('{} - {}:'.format(df_categories['category'][i], list_url_categories[i]))
+    print('{} - {}:'.format(df_categories_supermarket['category'][i], list_url_categories[i]))
     
     # Get all urls products from category
     list_url_products = get_all_products_category(driver, soup, list_url_categories[i])
@@ -440,13 +444,13 @@ for i in range(len(list_url_categories)):
         id_brand = get_id_dataframe(df_brand, 'brand', 'id_brand', brand_product)
         id_type = get_id_dataframe(df_type, 'type', 'id_type', type_product)
         id_supermarket = get_id_dataframe(df_supermarket, 'supermarket', 'id_supermarket', NAME_SUPERMARKET)
-        id_category = df_categories['id_category'][i]
+        id_category = get_id_dataframe(df_categories, 'category', 'id_category', df_categories_supermarket['category'][i])
         id_product = len(df_products)
         
         # Get product details
         data_product = get_data_product_beautifulsoup(soup, id_category, id_brand, id_type, id_product)
         if data_product == 'NA':
-            tmp_df = create_row_error_product(url_product, df_categories['category'][i], id_supermarket, columns_error)
+            tmp_df = create_row_error_product(url_product, df_categories_supermarket['category'][i], id_supermarket, columns_error)
             df_error_products = pd.concat([df_error_products, tmp_df], ignore_index=True)
             cont_products_category += 1
             continue
