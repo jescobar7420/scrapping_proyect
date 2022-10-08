@@ -454,7 +454,7 @@ for i in range(len(list_url_categories)):
             continue
                
         # Add product if doesn't exists in dataframe
-        elif exists_row_dataframe(df_products, 'name', id_product) == False:
+        elif exists_row_dataframe(df_products, 'name', data_product[4]) == False:
             df_new_row = pd.DataFrame(data=[data_product], columns=columns_product)
             df_products = pd.concat([df_products, df_new_row], ignore_index=True)
         

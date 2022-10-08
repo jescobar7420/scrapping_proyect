@@ -220,8 +220,14 @@ def get_all_products_category(browser, soup, url_category):
     pages_categories = get_all_pages_category(soup, url_category)
     for page in pages_categories:
         # Connect to page category
-        browser.get(page)
-        sleep(5)
+        while True:
+            try:
+                browser.get(page)
+                sleep(5)
+                break
+            except:
+                sleep(10)
+                pass
         
         # Get url of all products from page category
         soup = BeautifulSoup(browser.page_source, 'lxml')
@@ -371,10 +377,16 @@ if exists(MAIN_PATH + '/Data/error_products.csv'):
     df_error_products = pd.read_csv(MAIN_PATH + '/Data/error_products.csv')
 
 # Connect to main website
-driver = webdriver.Chrome(MAIN_PATH + '/chromedriver.exe')
-driver.set_window_size(1280, 720)
-driver.get(MAIN_URL)
-sleep(1)
+while True:
+    try:
+        driver = webdriver.Chrome(MAIN_PATH + '/chromedriver.exe')
+        driver.set_window_size(1280, 720)
+        driver.get(MAIN_URL)
+        sleep(1)
+        break
+    except:
+        sleep(10)
+        pass
 
 # Hover mouse in the Navbar
 element_path = driver.find_element_by_xpath('//*[@id="root"]/div/header/div[3]/nav/div/div[2]/div[2]/a')
@@ -407,8 +419,14 @@ df_categories_supermarket = get_data_categories(df_categories_supermarket, categ
 
 # Browse all categories
 for i in range(len(list_url_categories)):
-    driver.get(list_url_categories[i])
-    sleep(5)
+    while True:
+        try:
+            driver.get(list_url_categories[i])
+            sleep(5)
+            break
+        except:
+            sleep(10)
+            pass
     soup = BeautifulSoup(driver.page_source, 'lxml')
     print('{} - {}:'.format(df_categories_supermarket['category'][i], list_url_categories[i]))
     
@@ -419,8 +437,15 @@ for i in range(len(list_url_categories)):
     total_products_category = len(list_url_products)
     for url_product in list_url_products:
         # Connect to product details
-        driver.get(url_product)
-        sleep(1)
+        while True:
+            try:
+                driver.get(url_product)
+                sleep(1)
+                break
+            except:
+                sleep(10)
+                pass
+                
         soup = BeautifulSoup(driver.page_source, 'lxml')
                
         # Add to dataframe if doesn't exists and get its id
@@ -469,6 +494,16 @@ for i in range(len(list_url_categories)):
         total_products += 1
         cont_products_category += 1
         print('[{}/{}] > {} - ${} < ${}'.format(cont_products_category, total_products_category, data_product[4], data_superproduct[3], data_superproduct[2]))
+        
+        if total_products % 100 == 0:
+            # Save DataFrame to .csv
+            save_data_csv(df_products, 'Data/products', columns_product)
+            save_data_csv(df_categories, 'Data/categories', columns_category)
+            save_data_csv(df_type, 'Data/type', columns_type)
+            save_data_csv(df_brand, 'Data/brand', columns_brand)
+            save_data_csv(df_super_product, 'Data/supermarketproduct', columns_super_product)
+            save_data_csv(df_supermarket, 'Data/supermarket', columns_supermarket)
+            save_data_csv(df_error_products, 'Data/error_products', columns_error)
         
 print('Total products from {}: {}'.format(NAME_SUPERMARKET, total_products))
 
