@@ -130,32 +130,34 @@ def get_data_product_selenium(browser, id_category, id_brand, id_type, id_produc
 def get_data_product_beautifulsoup(soup, id_category, id_brand, id_type, id_product):
     # If the product can't load or the product already exists
     error_product = find_text_by_class_beautifulsoup(soup, 'div', 'error-404-empty-message')
-    if error_product != 'NA':
+    if error_product != 'NA' or error_product == '':
         print('\tError read product - {}'.format(url_product))
         return 'NA'
     
     # Get data of the product
     name_product = (find_firts_text_element_by_class_beautifulsoup(soup, 'h1', 'product-name')).upper()
-    if name_product == 'NA':
+    if name_product == 'NA' or name_product == '':
         name_product = (find_text_by_class_beautifulsoup(soup, 'h1', 'product-name')).upper()
-        if name_product == 'NA':
+        if name_product == 'NA' or name_product == '':
             print('\tError read product - {}'.format(url_product))
             return 'NA'
     
     # URL of the image is in the style of a div
     image_product = find_by_class_beautifulsoup(soup, 'div', 'zoomed-image')
-    if image_product != 'NA' and type(image_product) != 'NoneType':
+    if image_product != 'NA' and image_product != '' and type(image_product) != 'NoneType':
         try:
             image_product = image_product.get('style')
             image_product = clear_url_image(image_product)
         except:
             image_product = 'NA'
+    if image_product == '':
+        image_product == 'NA'
        
     # Description can has two different xpath
     description1 = find_text_by_class_beautifulsoup(soup, 'p', '')
     description2 = find_text_by_class_beautifulsoup(soup, 'div', 'product-description-content')
     
-    description_product = ''
+    description_product = 'NA'
     if description1 != 'NA' and description1 != '':
         description_product = description1
     
@@ -163,6 +165,8 @@ def get_data_product_beautifulsoup(soup, id_category, id_brand, id_type, id_prod
         description_product += ' ' + description2
     
     ingredients = find_text_by_class_beautifulsoup(soup, 'div', 'product-ingredients-text')
+    if ingredients == '':
+        ingredients == 'NA'
     
     data = [str(id_product),
             str(id_category),
@@ -226,7 +230,6 @@ def get_all_products_category(browser, soup, url_category):
                 sleep(5)
                 break
             except:
-                sleep(10)
                 pass
         
         # Get url of all products from page category
@@ -268,19 +271,23 @@ def exists_superproduct(df, id_supermarket, id_product, date_scrap):
     
     
 def get_data_superproduct_selenium(browser, id_supermarket, id_product, url, date):
-    sale_price = clear_price(get_text_selenium(browser, '//*[@id="root"]/div/div[2]/div/div/main/div[1]/div[2]/div[5]/div[1]/div/div[1]/span[1]'))    
+    sale_price = clear_price(get_text_selenium(browser, '//*[@id="root"]/div/div[2]/div/div/main/div[1]/div[2]/div[5]/div[1]/div/div[1]/span[1]'))
+    if sale_price == '':
+        sale_price = 'NA'
     
     # If the tag exists, the product is out of stock
     available = get_text_selenium(browser, '//*[@id="root"]/div/div[2]/div/div/main/div[1]/div[2]/div[1]/span')
+    stock = 'NA'
     if available == 'NA':
         stock = 'Yes'
     else:
         stock = 'No'
     
     # The normal price can has two different xpath
+    normal_price = 'NA'
     if stock == 'Yes':
         normal_price = get_text_selenium(browser, '//*[@id="root"]/div/div[2]/div/div/main/div[1]/div[2]/div[5]/div[2]/div/div/div/span/span/span')
-        if normal_price == 'NA':
+        if normal_price == 'NA' or normal_price == '':
             normal_price = get_text_selenium(browser, '//*[@id="root"]/div/div[2]/div/div/main/div[1]/div[2]/div[5]/div/span')
         normal_price = clear_price(normal_price)
     else:
@@ -385,7 +392,6 @@ while True:
         sleep(1)
         break
     except:
-        sleep(10)
         pass
 
 # Hover mouse in the Navbar
@@ -425,7 +431,6 @@ for i in range(len(list_url_categories)):
             sleep(5)
             break
         except:
-            sleep(10)
             pass
     soup = BeautifulSoup(driver.page_source, 'lxml')
     print('{} - {}:'.format(df_categories_supermarket['category'][i], list_url_categories[i]))
@@ -443,17 +448,21 @@ for i in range(len(list_url_categories)):
                 sleep(1)
                 break
             except:
-                sleep(10)
                 pass
                 
         soup = BeautifulSoup(driver.page_source, 'lxml')
                
         # Add to dataframe if doesn't exists and get its id
         brand_product = (find_text_by_class_beautifulsoup(soup, 'a', 'product-brand')).upper()
+        if brand_product == '':
+            brand_product = 'NA'
+        
         type_product = 'NA'
         element_type = find_text_by_class_beautifulsoup(soup, 'span', 'technical-information-flags-title')
         if element_type == 'Tipo de Producto':
             type_product = (find_text_by_class_beautifulsoup(soup, 'span', 'technical-information-flags-value')).upper()
+            if type_product == '':
+                type_product = 'NA'
                
         # Get brand and add to dataframe is not exists
         if exists_row_dataframe(df_brand, 'brand', brand_product) == False:
@@ -478,10 +487,9 @@ for i in range(len(list_url_categories)):
             tmp_df = create_row_error_product(url_product, df_categories_supermarket['category'][i], id_supermarket, columns_error)
             df_error_products = pd.concat([df_error_products, tmp_df], ignore_index=True)
             cont_products_category += 1
-            continue
-               
+            continue     
         # Add product if doesn't exists in dataframe
-        elif exists_row_dataframe(df_products, 'name', id_product) == False:
+        elif exists_row_dataframe(df_products, 'name', data_product[4]) == False:
             df_new_row = pd.DataFrame(data=[data_product], columns=columns_product)
             df_products = pd.concat([df_products, df_new_row], ignore_index=True)
         
